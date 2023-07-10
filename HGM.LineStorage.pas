@@ -26,17 +26,21 @@ type
   public
     function GetById(const Index: Integer): string;
     function GetByName(const Name: string): string;
+    function GetItemByName(const Name: string): TLineItem;
   end;
 
   TLineStorage = class(TComponent)
   private
     FItems: TLineItems;
     procedure SetItems(const Value: TLineItems);
+    function GetLines(const Name: string): string;
+    procedure SetLines(const Name, Value: string);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetById(const Index: Integer): string;
     function GetByName(const Name: string): string;
+    property Lines[const Name: string]: string read GetLines write SetLines;
   published
     property Items: TLineItems read FItems write SetItems;
   end;
@@ -102,9 +106,19 @@ begin
   Result := FItems.GetByName(Name);
 end;
 
+function TLineStorage.GetLines(const Name: string): string;
+begin
+  Result := GetByName(Name);
+end;
+
 procedure TLineStorage.SetItems(const Value: TLineItems);
 begin
   FItems.Assign(Value);
+end;
+
+procedure TLineStorage.SetLines(const Name, Value: string);
+begin
+  FItems.GetItemByName(Name).Name := Value;
 end;
 
 { TLineItems }
@@ -119,6 +133,15 @@ begin
   for var Item in Self do
     if TLineItem(Item).Name = Name then
       Exit(TLineItem(Item).Lines.Text);
+  ErrorArgumentOutOfRange;
+end;
+
+function TLineItems.GetItemByName(const Name: string): TLineItem;
+begin
+  Result := nil;
+  for var Item in Self do
+    if TLineItem(Item).Name = Name then
+      Exit(TLineItem(Item));
   ErrorArgumentOutOfRange;
 end;
 
